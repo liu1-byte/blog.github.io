@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>刘小彻的日记 · 时光簿</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #2b3a67 0%, #1a2a4f 100%);
+            font-family: 'Microsoft YaHei', '楷体', 'KaiTi', cursive;
+            min-height: 100vh;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        /* 装饰星星 */
+        body::before {
+            content: "✦";
+            font-size: 120px;
+            color: rgba(255,215,0,0.2);
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            transform: rotate(15deg);
+            pointer-events: none;
+        }
+
+        body::after {
+            content: "✧";
+            font-size: 180px;
+            color: rgba(255,255,255,0.1);
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            transform: rotate(-10deg);
+            pointer-events: none;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            max-width: 1200px;
+            margin: 0 auto 40px;
+            padding: 20px 30px;
+            background: rgba(255, 249, 230, 0.95);
+            border-radius: 60px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3), 0 0 0 4px #ffd700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #1a2a4f;
+            text-shadow: 2px 2px 0 #ffd700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: #ffd700;
+            color: #1a2a4f;
+            border: none;
+            padding: 8px 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border-radius: 40px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #b8860b;
+            transition: 0.1s;
+            border: 2px solid white;
+            text-decoration: none;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #b8860b;
+            background: #ffed4a;
+        }
+
+        /* 主容器 */
+        .diary-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        /* 当前日记卡片 */
+        .current-diary {
+            background: #fff9e6;
+            padding: 40px;
+            border-radius: 40px 40px 40px 0;
+            box-shadow: 0 30px 40px rgba(0,0,0,0.4), 0 0 0 8px #ffd700;
+            transform: rotate(0.5deg);
+            transition: 0.3s;
+        }
+
+        .current-diary:hover {
+            transform: rotate(0deg);
+            box-shadow: 0 35px 45px rgba(0,0,0,0.5), 0 0 0 8px #ff6b6b;
+        }
+
+        h1 {
+            color: #1a2a4f;
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 0 #ffd700;
+            border-bottom: 4px dashed #ffd700;
+            padding-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .diary-time {
+            background: #1a2a4f;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 1rem;
+            display: inline-block;
+            margin-bottom: 20px;
+            border: 2px solid #ffd700;
+        }
+
+        .diary-content-edit {
+            width: 100%;
+            min-height: 200px;
+            font-size: 1.5em;
+            font-family: '楷体', 'KaiTi', cursive;
+            color: #2c3e50;
+            background: rgba(255,215,0,0.1);
+            border: 3px dashed #ffd700;
+            border-radius: 30px;
+            padding: 20px;
+            margin: 20px 0;
+            resize: vertical;
+            outline: none;
+            line-height: 1.6;
+        }
+
+        .diary-content-edit:focus {
+            border-color: #ff6b6b;
+            background: rgba(255,215,0,0.15);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .diary-btn {
+            background: #ffd700;
+            color: #1a2a4f;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 60px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #b8860b;
+            transition: 0.1s;
+            border: 2px solid white;
+            min-width: 120px;
+        }
+
+        .diary-btn:hover {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #b8860b;
+            background: #ffed4a;
+        }
+
+        .diary-btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 0px 0 #b8860b;
+        }
+
+        .diary-btn.delete {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        /* 历史日记卡片 */
+        .history-diary {
+            background: #fff9e6;
+            padding: 40px;
+            border-radius: 40px 40px 40px 0;
+            box-shadow: 0 30px 40px rgba(0,0,0,0.4), 0 0 0 8px #ffd700;
+            transform: rotate(-0.5deg);
+            transition: 0.3s;
+        }
+
+        .history-diary:hover {
+            transform: rotate(0deg);
+            box-shadow: 0 35px 45px rgba(0,0,0,0.5), 0 0 0 8px #4ecdc4;
+        }
+
+        h2 {
+            color: #1a2a4f;
+            font-size: 2.2em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 0 #ffd700;
+            border-bottom: 3px dashed #ffd700;
+            padding-bottom: 10px;
+        }
+
+        .history-list {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .history-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .history-list::-webkit-scrollbar-track {
+            background: rgba(26,42,79,0.1);
+            border-radius: 10px;
+        }
+
+        .history-list::-webkit-scrollbar-thumb {
+            background: #ffd700;
+            border-radius: 10px;
+            border: 2px solid #1a2a4f;
+        }
+
+        .history-item {
+            background: white;
+            border: 3px solid #1a2a4f;
+            border-radius: 30px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 0 #b8860b;
+        }
+
+        .history-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #b8860b;
+            border-color: #ffd700;
+        }
+
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            color: #1a2a4f;
+            font-weight: bold;
+        }
+
+        .history-time {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .history-preview {
+            font-size: 1.1em;
+            color: #2c3e50;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .empty-history {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+            font-size: 1.2em;
+            background: rgba(255,215,0,0.05);
+            border-radius: 30px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 800px) {
+            .diary-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <div class="navbar">
+        <div class="logo">📔 刘小彻的时光簿</div>
+        <div class="nav-links">
+            <a href="index.html" class="nav-btn">🏠 首页</a>
+        </div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="diary-container">
+        <!-- 当前日记 -->
+        <div class="current-diary">
+            <h1>📝 写日记</h1>
+            
+            <div class="diary-time" id="currentTime">
+                正在编辑...
+            </div>
+
+            <!-- 日记编辑框 - 默认为空 -->
+            <textarea 
+                class="diary-content-edit" 
+                id="diaryContent" 
+                placeholder="今天想写点什么呢？..."
+            ></textarea>
+
+            <div class="button-group">
+                <button class="diary-btn" onclick="saveDiary()">💾 保存</button>
+                <button class="diary-btn" onclick="clearEditor()">🔄 清空</button>
+                <button class="diary-btn delete" onclick="deleteAllDiaries()">🗑️ 全部删除</button>
+            </div>
+
+            <div style="text-align: center; color: #666; font-size: 0.9em;">
+                点击历史日记可查看详情
+            </div>
+        </div>
+
+        <!-- 历史日记 -->
+        <div class="history-diary">
+            <h2>📚 历史日记</h2>
+            <div class="history-list" id="historyList">
+                <!-- 历史日记会动态显示在这里 -->
+                <div class="empty-history">
+                    ✨ 还没有日记，写一篇吧～
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        © 2026 刘小彻的博客 · 记录每一天的美好
+    </div>
+
+    <script>
+        // 加载历史日记
+        let diaries = JSON.parse(localStorage.getItem('diaries')) || [];
+
+        // 更新当前时间
+        function updateCurrentTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hour = String(now.getHours()).padStart(2, '0');
+            const minute = String(now.getMinutes()).padStart(2, '0');
+            
+            const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            const weekday = weekdays[now.getDay()];
+            
+            document.getElementById('currentTime').textContent = 
+                `${year}年${month}月${day}日 ${weekday} ${hour}:${minute}`;
+        }
+
+        // 保存日记
+        function saveDiary() {
+            const content = document.getElementById('diaryContent').value.trim();
+            
+            if (!content) {
+                alert('写点什么再保存吧～');
+                return;
+            }
+
+            const now = new Date();
+            const diary = {
+                id: Date.now(),
+                content: content,
+                time: now.toLocaleString(),
+                timestamp: now.getTime()
+            };
+
+            diaries.unshift(diary); // 最新的放前面
+            localStorage.setItem('diaries', JSON.stringify(diaries));
+
+            // 清空编辑器
+            document.getElementById('diaryContent').value = '';
+            
+            // 刷新历史列表
+            displayHistory();
+            
+            alert('日记保存成功！');
+        }
+
+        // 清空编辑器
+        function clearEditor() {
+            document.getElementById('diaryContent').value = '';
+        }
+
+        // 删除所有日记
+        function deleteAllDiaries() {
+            if (confirm('确定要删除所有日记吗？此操作不可恢复！')) {
+                diaries = [];
+                localStorage.setItem('diaries', JSON.stringify(diaries));
+                displayHistory();
+                alert('所有日记已删除');
+            }
+        }
+
+        // 删除单篇日记
+        function deleteDiary(id, event) {
+            event.stopPropagation(); // 阻止触发查看详情
+            
+            if (confirm('确定删除这篇日记吗？')) {
+                diaries = diaries.filter(d => d.id !== id);
+                localStorage.setItem('diaries', JSON.stringify(diaries));
+                displayHistory();
+            }
+        }
+
+        // 查看日记详情
+        function viewDiary(diary) {
+            // 把日记内容显示到编辑框
+            document.getElementById('diaryContent').value = diary.content;
+            
+            // 滚动到编辑区域
+            document.querySelector('.current-diary').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+        }
+
+        // 显示历史日记列表
+        function displayHistory() {
+            const historyList = document.getElementById('historyList');
+            
+            if (diaries.length === 0) {
+                historyList.innerHTML = `
+                    <div class="empty-history">
+                        ✨ 还没有日记，写一篇吧～
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            diaries.forEach(diary => {
+                // 提取日期部分
+                const date = new Date(diary.timestamp);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hour = String(date.getHours()).padStart(2, '0');
+                const minute = String(date.getMinutes()).padStart(2, '0');
+                
+                html += `
+                    <div class="history-item" onclick="viewDiary(${JSON.stringify(diary).replace(/"/g, '&quot;')})">
+                        <div class="history-item-header">
+                            <span>📅 ${year}.${month}.${day}</span>
+                            <span class="history-time">${hour}:${minute}</span>
+                        </div>
+                        <div class="history-preview">
+                            ${diary.content.length > 50 ? diary.content.substring(0, 50) + '...' : diary.content}
+                        </div>
+                        <div style="text-align: right; margin-top: 10px;">
+                            <button class="diary-btn" style="padding: 5px 15px; font-size: 0.9em;" 
+                                onclick="deleteDiary(${diary.id}, event)">删除</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            historyList.innerHTML = html;
+        }
+
+        // 每秒更新一次时间
+        updateCurrentTime();
+        setInterval(updateCurrentTime, 1000);
+
+        // 页面加载时显示历史日记
+        displayHistory();
+    </script>
+</body>
+</html>
